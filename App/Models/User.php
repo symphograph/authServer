@@ -3,8 +3,11 @@
 namespace App\Models;
 
 use PDO;
+use Symphograph\Bicycle\Api\CurlAPI;
+use Symphograph\Bicycle\Auth\Telegram\TeleUser;
 use Symphograph\Bicycle\Errors\AppErr;
 use Symphograph\Bicycle\Token\AccessToken;
+use Symphograph\Bicycle\Token\CurlToken;
 use Symphograph\Bicycle\Token\Token;
 use Symphograph\Bicycle\DB;
 use Symphograph\Bicycle\Errors\AuthErr;
@@ -63,6 +66,35 @@ class User
     {
         $qwe = qwe("select powerId from nn_powers where userId = :userId", ['userId' => $userId]);
         return $qwe->fetchAll(PDO::FETCH_COLUMN) ?? [];
+    }
+
+    public function curlPowers(): void
+    {
+        $jwt = CurlToken::create(2, [1]);
+        $TeleUser = $this->getTelegramUser();
+        if(!$TeleUser) {
+            return;
+        }
+        $curl = new CurlAPI(
+            'ussoStaff',
+            '/api/powers.php',
+            ['method' => 'byTelegram', 'telegramId' => $TeleUser->id],
+            $jwt
+        );
+        $response = $curl->post() or throw new AuthErr();
+        $this->powers = $response->data ?? [];
+        self::savePowers();
+    }
+
+    private function getTelegramUser(): TeleUser|false
+    {
+        $accounts = Account::getListByUser($this->id);
+        foreach ($accounts as $account){
+            if($account->authType == 'telegram'){
+                return TeleUser::byAccountId($account->id);
+            }
+        }
+        return false;
     }
 
     public static function bySess(string $sessionId): self|bool

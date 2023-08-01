@@ -18,7 +18,7 @@ $Session->lastTime = date('Y-m-d H:i:s');
 
 $Account = Account::byId($Session->accountId);
 $User = User::byAccount($Session->accountId);
-
+$User->curlPowers();
 
 $SessionToken = SessionToken::create($Session->id, $Session->lastTime);
 $AccessToken = AccessToken::create($User->id, $User->powers, $Session->lastTime, $Account->authType);

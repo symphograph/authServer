@@ -2,16 +2,21 @@
 
 namespace App\Models;
 
+use PDO;
 use Symphograph\Bicycle\Api\CurlAPI;
+use Symphograph\Bicycle\Auth\Telegram\TeleUser;
 use Symphograph\Bicycle\DB;
 use Symphograph\Bicycle\Errors\AppErr;
 use Symphograph\Bicycle\Errors\AuthErr;
 use Symphograph\Bicycle\Errors\MyErrors;
+use Symphograph\Bicycle\Token\CurlToken;
 
 class Account
 {
     const authTypes = [
         'default',
+        'telegram',
+        'server',
         'vk',
         'discord',
         'email'
@@ -54,6 +59,17 @@ class Account
 
         return boolval($curl->post()->result ?? false);
     }
+
+    /**
+     * @return self[]
+     */
+    public static function getListByUser(int $userId): array
+    {
+        $qwe = qwe("select * from accounts where userId = :userId", ['userId' => $userId]);
+        return $qwe->fetchAll(PDO::FETCH_CLASS, self::class) ?? [];
+    }
+
+
 
     public function putToDB(): void
     {

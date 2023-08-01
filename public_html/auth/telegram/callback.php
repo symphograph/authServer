@@ -25,15 +25,12 @@ if(!$savedTeleUser = TeleUser::byId($TeleUser->id)){
     $Account = Account::byId($savedTeleUser->accountId);
 }
 
-if($Account::isStaff($TeleUser->id)){
-    $User->powers[] = 11;
-    $User->powers = array_unique($User->powers);
-    $User->putToDB();
-}
+
 $Sess->accountId = $Account->id;
 $Sess->putToDB();
 $TeleUser->accountId = $Account->id;
 $TeleUser->putToDB();
+$User->curlPowers();
 
 $url = $_COOKIE['origin'] ?? false or throw new AuthErr('origin is missed', 'Не найден адрес перенаправления');
 qwe("COMMIT");
