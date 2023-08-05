@@ -16,6 +16,7 @@ use Throwable;
 class User
 {
     public int      $id;
+    public ?int      $parentId;
     public string   $created;
     public string   $lastTime;
     public ?string  $email;
@@ -84,6 +85,18 @@ class User
         $response = $curl->post() or throw new AuthErr();
         $this->powers = $response->data ?? [];
         self::savePowers();
+    }
+
+    public function curlUpdateId(): void
+    {
+        $jwt = CurlToken::create(2, [1]);
+        $curl = new CurlAPI(
+            'ussoSite',
+            '/api/tickets/ticket.php',
+            ['method' => 'updateUserId', 'oldId' => $this->id, 'newId' => $this->parentId],
+            $jwt
+        );
+        $response = $curl->post() or throw new AuthErr();
     }
 
     private function getTelegramUser(): TeleUser|false

@@ -8,7 +8,7 @@ require_once dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php';
 ($_SERVER['HTTP_REFERER'] ?? '')
     ===
     "https://{$_SERVER['SERVER_NAME']}/auth/telegram/login.php"
-    or die();
+    or throw new AuthErr('unknown referer');
 
 $TeleUser = Telegram::auth() or throw new AuthErr('telegram auth error');
 
@@ -30,8 +30,11 @@ $Sess->accountId = $Account->id;
 $Sess->putToDB();
 $TeleUser->accountId = $Account->id;
 $TeleUser->putToDB();
-$User->curlPowers();
-
+$parentUser = User::byAccount($Account->id);
+$parentUser->curlPowers();
+$User->parentId = $parentUser->id;
+$User->curlUpdateId();
+$User->putToDB();
 $url = $_COOKIE['origin'] ?? false or throw new AuthErr('origin is missed', 'Не найден адрес перенаправления');
 qwe("COMMIT");
 
