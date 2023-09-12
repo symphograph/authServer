@@ -12,7 +12,7 @@ class Test
     {
         $user = new User();
         $user->id = 1;
-        $user->created = date('Y-m-d h:i:s');
+        $user->createdAt = date('Y-m-d h:i:s');
         $user->putToDB();
 
     }

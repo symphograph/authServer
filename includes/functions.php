@@ -1,5 +1,6 @@
 <?php
 
+use JetBrains\PhpStorm\Language;
 use Symphograph\Bicycle\DB;
 use Symphograph\Bicycle\Env\Env;
 
@@ -12,7 +13,7 @@ function printr($var): void
     echo '</pre>';
 }
 
-function qwe(string $sql, array $args = null): bool|PDOStatement
+function qwe(#[Language("SQL")] string $sql, array $args = null): bool|PDOStatement
 {
     global $DB;
     if(!isset($DB)){

@@ -2,39 +2,52 @@
 
 namespace App\Models;
 
-use PDO;
-use Symphograph\Bicycle\Api\CurlAPI;
-use Symphograph\Bicycle\Auth\Telegram\TeleUser;
-use Symphograph\Bicycle\DB;
-use Symphograph\Bicycle\Errors\AppErr;
-use Symphograph\Bicycle\Errors\AuthErr;
-use Symphograph\Bicycle\Errors\MyErrors;
-use Symphograph\Bicycle\Token\CurlToken;
 
-class Account
+use App\DTO\AccountDTO;
+use PDO;
+use Symphograph\Bicycle\Auth\Discord\DiscordUser;
+use Symphograph\Bicycle\Auth\Mailru\MailruUser;
+use Symphograph\Bicycle\Auth\Telegram\TeleUser;
+use Symphograph\Bicycle\Auth\Vkontakte\VkUser;
+use Symphograph\Bicycle\DB;
+use Symphograph\Bicycle\Errors\{AccountErr, AppErr, AuthErr, MyErrors};
+use Symphograph\Bicycle\DTO\ModelTrait;
+use Symphograph\Bicycle\Token\AccessTokenData;
+
+class Account extends AccountDTO
 {
-    const authTypes = [
+    use ModelTrait;
+    public const authTypes = [
         'default',
         'telegram',
+        'mailru',
         'server',
-        'vk',
+        'vkontakte',
+        'yandex',
         'discord',
         'email'
     ];
-    public int    $id;
-    public int    $userId;
-    public string $authType;
-    public string $created;
-    public ?string $avaFileName;
 
-    public static function create(User $User, string $authType): self
+    public ?string      $externalAvaUrl;
+    public ?string      $label;
+    public ?string      $nickName;
+    public ?Avatar      $Avatar;
+    public ?TeleUser    $TeleUser;
+    public ?MailruUser  $MailruUser;
+    public ?DiscordUser $DiscordUser;
+    public ?VkUser      $VkUser;
+
+
+    public static function create(int $userId, string $authType): self
     {
         try {
             $Account = new self();
             $Account->id = DB::createNewID('accounts', 'id');
-            $Account->userId = $User->id;
+            $Account->userId = $userId;
             $Account->authType = $authType;
-            $Account->created = date('Y-m-d H:i:s');
+            $datetime = date('Y-m-d H:i:s');
+            $Account->createdAt = $datetime;
+            $Account->visitedAt = $datetime;
             $Account->putToDB();
             $Account = self::byId($Account->id) or throw new AppErr('Account');
         } catch (MyErrors) {
@@ -43,21 +56,107 @@ class Account
         return $Account;
     }
 
-    public static function byId(int $id): self|bool
+    public function initData(): void
     {
-        $qwe = qwe("select * from accounts where id = :id", ['id' => $id]);
-        return $qwe->fetchObject(self::class);
+        //if($this->authType === 'default') return;
+        self::initSocialProfile();
+        self::initAvatar();
     }
 
-    public static function isStaff(int $teleId): bool
+    public function initAvatar(): void
     {
-        $curl = new CurlAPI(
-            'ussoStaff',
-            '/curl/get/pers.php',
-            ['method' => 'byTeleId', 'teleId' => $teleId]
-        );
+        if($this->authType === 'default'){
+            $this->Avatar = new Avatar();
+            return;
+        }
+        if(empty($this->avaFileName)){
+            self::loadAvatar();
+            return;
+        }
+        $Avatar = Avatar::byAvaFileName($this->avaFileName);
+        if(!$Avatar) return;
+        $this->Avatar = $Avatar;
+    }
 
-        return boolval($curl->post()->result ?? false);
+    private function loadAvatar(): void
+    {
+        $Avatar = Avatar::byExternalUrl($this->externalAvaUrl);
+        if(!$Avatar) {
+            return;
+        }
+
+
+        $this->avaFileName = $Avatar->fileName;
+        self::putToDB();
+        $this->Avatar = $Avatar;
+    }
+
+    public static function byJwt(string $jwt): self|bool
+    {
+        $AccessTokenData = new AccessTokenData($jwt);
+        return Account::byId($AccessTokenData->accountId);
+    }
+
+    public function initSocialProfile(): void
+    {
+        match ($this->authType){
+            'default' => true,
+            'telegram' => self::initTeleUser(),
+            'mailru' => self::initMailruUser(),
+            'discord' => self::initDiscordUser(),
+            'vkontakte' => self::initVkUser(),
+            default => null
+        };
+    }
+
+    private function initTeleUser(): void
+    {
+        $TeleUser = TeleUser::byAccountId($this->id)
+            or throw new AccountErr('Account does not exist', 'Аккаунт не найден');
+
+        $this->TeleUser = $TeleUser;
+        $this->externalAvaUrl = $TeleUser->photo_url;
+        $this->label = 'Телеграм';
+        $this->nickName = self::nickByNames($TeleUser->first_name, $TeleUser->last_name);
+    }
+
+    private static function nickByNames($firstName, $lastName): string
+    {
+        $nickName = ($firstName ?? '') . ' ' . ($lastName);
+        return trim($nickName);
+    }
+
+    private function initMailruUser(): void
+    {
+        $MailruUser = MailruUser::byAccountId($this->id)
+            or throw new AccountErr('Account does not exist', 'Аккаунт не найден');
+
+        $this->MailruUser = $MailruUser;
+        $this->externalAvaUrl = $MailruUser->image;
+        $this->label = 'mail.ru';
+        $this->nickName = $MailruUser->getNickName();
+    }
+
+    private function initDiscordUser(): void
+    {
+        $DiscordUser = DiscordUser::byAccountId($this->id)
+            or throw new AccountErr('Account does not exist', 'Аккаунт не найден');
+
+        $this->DiscordUser = $DiscordUser;
+        $this->externalAvaUrl = "https://cdn.discordapp.com/avatars/$DiscordUser->id/$DiscordUser->avatar.png";
+        $this->label = 'discord';
+        $this->nickName = $DiscordUser->username;
+    }
+
+    private function initVkUser(): void
+    {
+        $VkUser = VkUser::byAccountId($this->id)
+        or throw new AccountErr('Account does not exist', 'Аккаунт не найден');
+
+        $this->VkUser = $VkUser;
+        $this->externalAvaUrl = $VkUser->photo_rec;
+        $this->label = 'vkontakte';
+        $this->nickName = self::nickByNames($VkUser->first_name, $VkUser->last_name);
     }
 
     /**
@@ -69,11 +168,4 @@ class Account
         return $qwe->fetchAll(PDO::FETCH_CLASS, self::class) ?? [];
     }
 
-
-
-    public function putToDB(): void
-    {
-        $params = DB::initParams($this);
-        DB::replace('accounts', $params);
-    }
 }
