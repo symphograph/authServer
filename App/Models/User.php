@@ -39,7 +39,6 @@ class User extends UserDTO
         }
     }
 
-
     public function curlUpdateId(): void
     {
         $jwt = CurlToken::create([1]);
@@ -77,6 +76,12 @@ class User extends UserDTO
     {
         $Account = Account::byId($accountId);
         return self::byId($Account->userId);
+    }
+
+    public static function byTelegram(int $telegramId): self|false
+    {
+        $TeleUser = TeleUser::byId($telegramId);
+        return self::byAccount($TeleUser->accountId);
     }
 
     public function setCookMarker(): void

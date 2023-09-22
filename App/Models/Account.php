@@ -74,7 +74,10 @@ class Account extends AccountDTO
             return;
         }
         $Avatar = Avatar::byAvaFileName($this->avaFileName);
-        if(!$Avatar) return;
+        if(!$Avatar){
+            self::loadAvatar();
+            return;
+        }
         $this->Avatar = $Avatar;
     }
 

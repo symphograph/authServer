@@ -86,9 +86,11 @@ class Session extends SessionDTO
         //TODO сделать переменную клиента
         $jwt = CurlToken::create([1]);
         $TeleUser = $this->getTelegramUser();
+
         if (!$TeleUser) {
             return;
         }
+
         $curl = new CurlAPI(
             'ussoStaff',
             '/api/powers.php',

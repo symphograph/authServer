@@ -14,7 +14,6 @@ use Symphograph\Bicycle\Token\Token;
 
 require_once dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php';
 
-//setcookie('ttt', '123', Config::cookOpts(expires: time() + 3600, secure: false, httponly: false, samesite: 'None'));
 $Session = Session::byJWT();
 $Session->lastIp = $_SERVER['REMOTE_ADDR'];
 $Session->visitedAt = date('Y-m-d H:i:s');
@@ -37,7 +36,7 @@ $AccessToken = AccessToken::create(
     $Session->powers,
     $Session->visitedAt,
     $Account->authType,
-    $Account->Avatar->fileName
+    $Account->Avatar->fileName ?? 'init_ava.png'
 );
 
 $data = [
