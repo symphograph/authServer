@@ -30,7 +30,7 @@ class AuthCallBack
             return $User;
         }
 
-        $User = User::byMarker($_COOKIE[UserDTO::cookieName ?? '']);
+        $User = User::byMarker($_COOKIE[UserDTO::cookieName]  ?? '');
         if (!empty($User)) {
             return $User;
         }
