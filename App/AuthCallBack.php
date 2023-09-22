@@ -24,7 +24,7 @@ class AuthCallBack
 
     public static function getUser(): User|bool
     {
-        if (empty($_COOKIE[SessionDTO::cookieName])) {
+        if (!empty($_COOKIE[SessionDTO::cookieName])) {
             $User = User::bySess($_COOKIE[SessionDTO::cookieName] ?? '')
             or throw new AppErr('user does not exist');
             return $User;
