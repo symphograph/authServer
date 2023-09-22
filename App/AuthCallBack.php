@@ -70,7 +70,11 @@ class AuthCallBack
      * @param SocialAccountITF $responseUser
      * @return void
      */
-    public static function accountTransaction(SocialAccountITF|bool $existingUser, string $authType, SocialAccountITF $responseUser): void
+    public static function accountTransaction(
+        SocialAccountITF|bool $existingUser,
+        string $authType,
+        SocialAccountITF $responseUser
+    ): void
     {
         DB::pdo()->beginTransaction();
             $Sess = Session::byMarker($_COOKIE[SessionDTO::cookieName] ?? '') or
@@ -94,8 +98,8 @@ class AuthCallBack
             $User->parentId = $parentUser->id;
             $User->putToDB();
 
-            $url = $_COOKIE['origin'] ?? false
-            or throw new AuthErr('origin is missed', 'Не найден адрес перенаправления');
+            $url = $_COOKIE['origin']
+                ?? throw new AuthErr('origin is missed', 'Не найден адрес перенаправления');
 
             $Device = Device::byCookie();
             $Device->linkToAccount($Account->id);
