@@ -97,10 +97,12 @@ class Session extends SessionDTO
             ['method' => 'byTelegram', 'telegramId' => $TeleUser->id],
             $jwt
         );
-        $response = $curl->post();
-        if(!$response){
+        try {
+            $response = $curl->post();
+        } catch (Throwable $err) {
             return;
         }
+
         $this->powers = $response->data ?? [];
         $User = User::byAccount($TeleUser->accountId);
         self::savePowers($User->id, 'usso');
