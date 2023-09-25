@@ -4,7 +4,8 @@
 use App\AuthCallBack;
 
 require_once dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php';
-AuthCallBack::setCookies();
+AuthCallBack::loginChecks();
+//AuthCallBack::setCookies();
 ?>
 <!DOCTYPE html>
 <html lang="ru">

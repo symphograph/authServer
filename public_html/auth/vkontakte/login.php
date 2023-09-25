@@ -9,16 +9,6 @@ use Symphograph\Bicycle\Token\{AccessToken, SessionToken, SessionTokenData, Toke
 
 require_once dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php';
 
-Config::isClientOrigin() or
-throw new AuthErr('invalid origin', 'Источник не определён');
+AuthCallBack::loginChecks();
 
-AccessToken::validation($_POST['AccessToken'] ?? '');
-SessionToken::validation($_POST['SessionToken'] ?? '');
-
-$sessTokenData = new SessionTokenData($_POST['SessionToken']);
-$Sess = Session::byMarker($sessTokenData->marker) or
-throw new AuthErr('Session does not exist', 'Попробуйте еще раз');
-
-AuthCallBack::setCookies();
-
-echo Vkontakte::widgetPage('ЮССО VK вход', '/auth/vkontakte/callback.php');
+echo Vkontakte::widgetPage();
