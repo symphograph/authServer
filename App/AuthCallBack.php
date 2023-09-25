@@ -101,7 +101,7 @@ class AuthCallBack
             $url = $_COOKIE['origin']
                 ?? throw new AuthErr('origin is missed', 'Не найден адрес перенаправления');
 
-            $Device = Device::byCookie();
+            $Device = Device::bySessId($Sess->id) or throw new AuthErr('unknown device');
             $Device->linkToAccount($Account->id);
         DB::pdo()->commit();
         header("Location: $url/auth/callback");

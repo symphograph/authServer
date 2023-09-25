@@ -18,8 +18,9 @@ $Device = Device::createOrUpdate();
 
 $User = User::create();
 $Account = Account::create($User->id, 'default');
-$Device->linkToAccount($Account->id);
 $Session = Session::create($Account->id);
+$Device->linkToSess($Session->id);
+$Device->linkToAccount($Account->id);
 
 $SessionToken = SessionToken::create($Session->marker, $Session->visitedAt);
 $AccessToken = AccessToken::create(
@@ -38,6 +39,7 @@ if(Env::isDebugMode()){
     $data['User'] = $User;
     $data['Account'] = $Account;
     $data['Session'] = $Session;
+    $data['Device'] = $Device;
 }
 
 Response::data($data);

@@ -16,4 +16,16 @@ class DeviceDTO extends DTO
     public string $createdAt;
     public string $visitedAt;
 
+    public static function bySessId(int $sessId): self|false
+    {
+        $qwe = qwe("
+            select devices.* from devices 
+            inner join autht.deviceSess dS 
+            on devices.id = dS.deviceId
+            and dS.sessId = :sessId",
+            ['sessId' => $sessId]
+        );
+        return $qwe->fetchObject(self::class);
+    }
+
 }

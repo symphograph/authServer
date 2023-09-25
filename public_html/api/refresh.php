@@ -23,8 +23,9 @@ $Account->initData();
 
 
 $Device = Device::byCookie();
-Device::isLinked($Device->id, $Account->id)
+Device::isLinkedToSess($Device->id, $Session->id)
 or throw new AuthErr('Unknown device', 'Unknown device');
+$Device->update();
 
 $User = User::byAccount($Session->accountId);
 $Session->curlPowers();

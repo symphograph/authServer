@@ -31,12 +31,13 @@ if ($curAccount->userId !== $toAccount->userId) {
         'Произошла чудовищная ошибка'
     );
 }
-$Device = Device::byCookie();
-Device::isLinked($Device->id, $toAccount->id)
-or throw new AuthErr('needLogin', 'needLogin', 401);
+
 
 $SessionTokenData = new SessionTokenData($_POST['SessionToken']);
 $Sess = Session::byMarker($SessionTokenData->marker);
+$Device = Device::byCookie();
+Device::isLinked($Device->id, $Sess->id)
+or throw new AuthErr('needLogin', 'needLogin', 401);
 $Sess->accountId = $toAccount->id;
 $Sess->putToDB();
 Response::success();

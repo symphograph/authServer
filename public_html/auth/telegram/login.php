@@ -1,6 +1,7 @@
 <?php
 
 use App\AuthCallBack;
+use App\Models\Device;
 use Symphograph\Bicycle\Auth\Telegram\Telegram;
 use Symphograph\Bicycle\Env\Env;
 

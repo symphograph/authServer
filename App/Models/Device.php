@@ -13,6 +13,7 @@ class Device extends DeviceDTO
 {
     use ModelTrait;
     use ModelCookieTrait;
+    const cookDuration = 31536000;
 
     public static function byCookie(): self|false
     {
@@ -27,6 +28,14 @@ class Device extends DeviceDTO
         return $Device;
     }
 
+    public static function bySessId(int $sessId): self|false
+    {
+        $parent = parent::bySessId($sessId);
+        $self = new self();
+        $self->bindSelf($parent);
+        return $self;
+    }
+
     public static function createOrUpdate(): self
     {
         if (empty($_COOKIE[self::cookieName])) {
@@ -37,8 +46,7 @@ class Device extends DeviceDTO
             self::unsetCookie();
             throw new AuthErr('invalid device', 'Что-то не получилось. Попробуйте ещё раз');
         }
-        $Device->visitedAt = date('Y-m-d H:i:s');
-        $Device->putToDB();
+        $Device->update();
         return $Device;
     }
 
@@ -51,8 +59,14 @@ class Device extends DeviceDTO
         $Device->visitedAt = $time;
         $Device->putToDB();
         $Device->id = DB::lastId();
-        $Device->setCookie(3600 * 24 * 365);
+        $Device->setCookie(self::cookDuration);
         return $Device;
+    }
+
+    public function update(): void
+    {
+        $this->visitedAt = date('Y-m-d H:i:s');
+        $this->setCookie(self::cookDuration);
     }
 
     public function linkToAccount(int $accountId): void
@@ -65,10 +79,43 @@ class Device extends DeviceDTO
         DB::replace('deviceAccount', $params);
     }
 
-    public static function isLinked(string $deviceId, int $accountId): bool
+    public function linkToSess(int $sessId): void
+    {
+        $params = [
+            'deviceId'  => $this->id,
+            'sessId' => $sessId,
+            'linkedAt'  => date('Y-m-d H:i:s')
+        ];
+        DB::replace('deviceSess', $params);
+    }
+
+    public static function listByAccount(int $accountId): array
     {
         $qwe = qwe("
-            select * from deviceAccount 
+            select devices.* from devices 
+            inner join deviceAccount 
+                on devices.id = deviceAccount.deviceId
+                and deviceAccount.accountId = :accountId",
+            ['accountId'=>$accountId]
+        );
+        return $qwe->fetchAll(\PDO::FETCH_CLASS, self::class) ?? [];
+    }
+
+    public static function isLinkedToSess(string $deviceId, int $sessId): bool
+    {
+        $qwe = qwe("
+            select * from deviceSess
+            where deviceId = :deviceId 
+            and sessId = :sessId",
+            ['deviceId' => $deviceId, 'sessId' => $sessId]
+        );
+        return $qwe && $qwe->rowCount();
+    }
+
+    public static function isLinkedToAccount(string $deviceId, int $accountId): bool
+    {
+        $qwe = qwe("
+            select * from deviceAccount
             where deviceId = :deviceId 
             and accountId = :accountId",
             ['deviceId' => $deviceId, 'accountId' => $accountId]
