@@ -24,8 +24,8 @@ class AccountCTRL extends Account
 
     #[NoReturn] public static function list(): void
     {
-        $userId = AccessTokenData::userId();
-        $list = Account::getListByUser($userId);
+        $Device = Device::byCookie();
+        $list = Account::getListByDevice($Device->id);
         $list = Account::initDataInList($list);
         Response::data($list);
     }

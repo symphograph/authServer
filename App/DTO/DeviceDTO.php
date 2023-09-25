@@ -20,7 +20,7 @@ class DeviceDTO extends DTO
     {
         $qwe = qwe("
             select devices.* from devices 
-            inner join autht.deviceSess dS 
+            inner join deviceSess dS 
             on devices.id = dS.deviceId
             and dS.sessId = :sessId",
             ['sessId' => $sessId]

@@ -171,4 +171,20 @@ class Account extends AccountDTO
         return $qwe->fetchAll(PDO::FETCH_CLASS, self::class) ?? [];
     }
 
+    /**
+     * @param int $deviceId
+     * @return self[]
+     */
+    public static function getListByDevice(int $deviceId): array
+    {
+        $qwe = qwe("
+            select accounts.* from accounts 
+            inner join deviceAccount dA 
+            on accounts.id = dA.accountId
+            and deviceId = :deviceId",
+        ['deviceId' => $deviceId]
+        );
+        return $qwe->fetchAll(PDO::FETCH_CLASS, self::class) ?? [];
+    }
+
 }
