@@ -35,9 +35,9 @@ if ($curAccount->userId !== $toAccount->userId) {
 
 $SessionTokenData = new SessionTokenData($_POST['SessionToken']);
 $Sess = Session::byMarker($SessionTokenData->marker);
-$Device = Device::byCookie();
-Device::isLinked($Device->id, $Sess->id)
-or throw new AuthErr('needLogin', 'needLogin', 401);
+$Device = Device::bySessId($Sess->id);
+Device::isLinkedToSess($Device->id, $Sess->id)
+    or throw new AuthErr('needLogin', 'needLogin', 401);
 $Sess->accountId = $toAccount->id;
 $Sess->putToDB();
 Response::success();
