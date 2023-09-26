@@ -42,14 +42,14 @@ class Account extends AccountDTO
     {
         try {
             $Account = new self();
-            $Account->id = DB::createNewID('accounts', 'id');
             $Account->userId = $userId;
             $Account->authType = $authType;
             $datetime = date('Y-m-d H:i:s');
             $Account->createdAt = $datetime;
             $Account->visitedAt = $datetime;
             $Account->putToDB();
-            $Account = self::byId($Account->id) or throw new AppErr('Account');
+            $Account = self::byId(DB::lastId())
+            or throw new AppErr('error on save Account', 'Ошибка при сохранении аккаунта');
         } catch (MyErrors) {
             throw new AuthErr('Account was not created', 'Не удалось создать аккаунт');
         }

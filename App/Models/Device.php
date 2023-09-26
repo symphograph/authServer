@@ -66,6 +66,7 @@ class Device extends DeviceDTO
     public function update(): void
     {
         $this->visitedAt = date('Y-m-d H:i:s');
+        $this->putToDB();
         $this->setCookie(self::cookDuration);
     }
 
