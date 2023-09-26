@@ -8,6 +8,7 @@ use Symphograph\Bicycle\DB;
 use App\Models\ModelCookieTrait;
 use Symphograph\Bicycle\DTO\ModelTrait;
 use Symphograph\Bicycle\Errors\AuthErr;
+use Symphograph\Bicycle\Logs\ErrorLog;
 
 class Device extends DeviceDTO
 {
@@ -43,8 +44,8 @@ class Device extends DeviceDTO
         }
         $Device = Device::byMarker($_COOKIE[self::cookieName]);
         if (!$Device) {
-            self::unsetCookie();
-            throw new AuthErr('invalid device', 'Что-то не получилось. Попробуйте ещё раз');
+            ErrorLog::writeMsg('device does not exist');
+            return self::create();
         }
         $Device->update();
         return $Device;
