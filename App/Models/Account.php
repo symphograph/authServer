@@ -63,7 +63,7 @@ class Account extends AccountDTO
         self::initAvatar();
     }
 
-    public function initAvatar(): void
+    private function initAvatar(): void
     {
         if($this->authType === 'default'){
             $this->Avatar = new Avatar();
@@ -75,8 +75,7 @@ class Account extends AccountDTO
         }
         $Avatar = Avatar::byAvaFileName($this->avaFileName);
         if(!$Avatar){
-            self::loadAvatar();
-            return;
+            $Avatar = new Avatar();
         }
         $this->Avatar = $Avatar;
     }

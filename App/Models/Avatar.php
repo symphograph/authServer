@@ -36,7 +36,12 @@ class Avatar
 
     public static function byExternalUrl(string $externalUrl): self|false
     {
-        $fileData = file_get_contents($externalUrl);
+        try {
+            $fileData = file_get_contents($externalUrl);
+        } catch (\Throwable) {
+            return false;
+        }
+
         $fileName = md5($fileData);
         $filePath = dirname($_SERVER['DOCUMENT_ROOT']) . '/uploadtmp/' . $fileName;
 
