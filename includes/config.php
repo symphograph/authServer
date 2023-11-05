@@ -13,3 +13,4 @@ Config::checkPermission();
 Config::postHandler();
 \App\Env\Config::initEndPoints();
 AccessLog::writeToLog();
+
