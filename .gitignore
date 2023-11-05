@@ -2,6 +2,7 @@
 .idea/
 /vendor/
 /composer.lock
+/composer.json
 /composer.phar
 /public_html/test/
 /includes/env.php
