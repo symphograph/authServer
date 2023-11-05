@@ -6,7 +6,7 @@ use Symphograph\Bicycle\Auth\Telegram\Telegram;
 use Symphograph\Bicycle\Env\Env;
 
 
-require_once dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php';
+require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 
 if(isset($_GET['logout'])) {
     setcookie('tg_user', '');

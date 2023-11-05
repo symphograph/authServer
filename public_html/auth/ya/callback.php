@@ -2,4 +2,4 @@
 
 use Symphograph\Bicycle\Env\Config;
 
-require_once dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php';
+require_once dirname(__DIR__, 3) . '/vendor/autoload.php';

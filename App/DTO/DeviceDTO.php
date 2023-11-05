@@ -2,19 +2,25 @@
 
 namespace App\DTO;
 
-use Symphograph\Bicycle\DB;
+
+use PDO;
 use Symphograph\Bicycle\DTO\DTOTrait;
 
-class DeviceDTO extends DTO
+class DeviceDTO
 {
     use DTOTrait;
     use DTOCookieTrait;
-    const tableName = 'devices';
+
+    const tableName  = 'devices';
     const cookieName = 'Mozart';
-    public int    $id;
-    public string $marker;
-    public string $createdAt;
-    public string $visitedAt;
+    public string    $marker;
+    public string    $createdAt;
+    public string    $visitedAt;
+    public string    $platform;
+    public bool      $ismobiledevice;
+    public string    $browser;
+    protected int    $id;
+    protected string $fingerPrint;
 
     public static function bySessId(int $sessId): self|false
     {
@@ -26,6 +32,28 @@ class DeviceDTO extends DTO
             ['sessId' => $sessId]
         );
         return $qwe->fetchObject(self::class);
+    }
+
+    /**
+     * Выбирает устройства, имеющие переданный fingerPrint
+     *
+     * @param string $fingerPrint
+     * @return self[]
+     */
+    public static function byFingerPrint(string $fingerPrint): array
+    {
+        $qwe = qwe("select * from devices where fingerPrint = :fingerPrint", ['fingerPrint' => $fingerPrint]);
+        return $qwe->fetchAll(PDO::FETCH_CLASS, self::class) ?? [];
+    }
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    public function setId(int $id): void
+    {
+        $this->id = $id;
     }
 
 }

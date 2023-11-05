@@ -6,8 +6,10 @@ use App\DTO\SessionDTO;
 use PDO;
 use Symphograph\Bicycle\Api\CurlAPI;
 use Symphograph\Bicycle\Auth\Telegram\TeleUser;
-use Symphograph\Bicycle\DB;
+use Symphograph\Bicycle\Errors\AppErr;
+use Symphograph\Bicycle\PDO\DB;
 use Symphograph\Bicycle\DTO\ModelTrait;
+use Symphograph\Bicycle\Env\Server\ServerEnv;
 use Symphograph\Bicycle\Token\AccessToken;
 use Symphograph\Bicycle\Token\CurlToken;
 use Symphograph\Bicycle\Token\SessionToken;
@@ -19,7 +21,6 @@ class Session extends SessionDTO
 {
     use ModelTrait;
     use ModelCookieTrait;
-    public array $powers = [];
 
     public static function create(int $accountId): self
     {
@@ -29,9 +30,10 @@ class Session extends SessionDTO
             $Session = new self();
             $Session->marker = self::createMarker();
             $Session->accountId = $accountId;
-            $Session->client = Client::getName();
-            $Session->firstIp = $_SERVER['REMOTE_ADDR'];
-            $Session->lastIp = $_SERVER['REMOTE_ADDR'];
+            $Session->client = Client::getNameByOrigin()
+                or throw new AppErr('client is empty', 'Клиент не найден');;
+            $Session->firstIp = ServerEnv::REMOTE_ADDR();
+            $Session->lastIp = ServerEnv::REMOTE_ADDR();
             $Session->createdAt = date('Y-m-d H:i:s');
             $Session->visitedAt = $Session->createdAt;
             $Session->platform = $agent->platform;
@@ -66,77 +68,4 @@ class Session extends SessionDTO
 
         return $Session;
     }
-
-    public function getPowers(): array
-    {
-        $clientGroup = Client::getGroupName($this->client);
-        $User = User::bySess($this->marker);
-        $qwe = qwe("
-            select powerId 
-            from nn_powers 
-            where userId = :userId
-            and clientGroup = :clientGroup",
-            ['userId' => $User->id, 'clientGroup' => $clientGroup]
-        );
-        return $qwe->fetchAll(PDO::FETCH_COLUMN) ?? [];
-    }
-
-    public function curlPowers(): void
-    {
-        //TODO сделать переменную клиента
-        $jwt = CurlToken::create([1]);
-        $TeleUser = $this->getTelegramUser();
-
-        if (!$TeleUser) {
-            return;
-        }
-
-        $curl = new CurlAPI(
-            'ussoStaff',
-            '/api/powers.php',
-            ['method' => 'byTelegram', 'telegramId' => $TeleUser->id],
-            $jwt
-        );
-        try {
-            $response = $curl->post();
-        } catch (Throwable $err) {
-            return;
-        }
-
-        $this->powers = $response->data ?? [];
-        $User = User::byAccount($TeleUser->accountId);
-        self::savePowers($User->id, 'usso');
-    }
-
-    private function savePowers(int $userId, string $clientGroup): void
-    {
-        qwe("
-            delete from nn_powers 
-            where userId = :userId 
-            and clientGroup = :clientGroup",
-            ['userId' => $userId, 'clientGroup' => $clientGroup]
-        );
-        foreach ($this->powers as $powerId) {
-            qwe("
-                replace into nn_powers 
-                    (userId, powerId, clientGroup) 
-                    VALUES 
-                    (:userId, :powerId, :clientGroup)",
-                ['userId' => $userId, 'powerId' => $powerId, 'clientGroup' => $clientGroup]
-            );
-        }
-    }
-
-    public function getTelegramUser(): TeleUser|false
-    {
-        $User = User::bySess($this->marker);
-        $accounts = Account::getListByUser($User->id);
-        foreach ($accounts as $account) {
-            if ($account->authType === 'telegram') {
-                return TeleUser::byAccountId($account->id);
-            }
-        }
-        return false;
-    }
-
 }

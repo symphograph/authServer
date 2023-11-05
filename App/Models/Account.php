@@ -5,14 +5,19 @@ namespace App\Models;
 
 use App\DTO\AccountDTO;
 use PDO;
+use Symphograph\Bicycle\Api\CurlAPI;
+use Symphograph\Bicycle\Api\Response;
 use Symphograph\Bicycle\Auth\Discord\DiscordUser;
 use Symphograph\Bicycle\Auth\Mailru\MailruUser;
 use Symphograph\Bicycle\Auth\Telegram\TeleUser;
 use Symphograph\Bicycle\Auth\Vkontakte\VkUser;
-use Symphograph\Bicycle\DB;
-use Symphograph\Bicycle\Errors\{AccountErr, AppErr, AuthErr, MyErrors};
+use Symphograph\Bicycle\Helpers;
+use Symphograph\Bicycle\Helpers\DateTimeHelper;
+use Symphograph\Bicycle\PDO\DB;
+use Symphograph\Bicycle\Errors\{AccountErr, ApiErr, AppErr, AuthErr, CurlErr, MyErrors, ValidationErr};
 use Symphograph\Bicycle\DTO\ModelTrait;
 use Symphograph\Bicycle\Token\AccessTokenData;
+use Throwable;
 
 class Account extends AccountDTO
 {
@@ -36,13 +41,13 @@ class Account extends AccountDTO
     public ?MailruUser  $MailruUser;
     public ?DiscordUser $DiscordUser;
     public ?VkUser      $VkUser;
+    public string       $contactValue;
 
 
-    public static function create(int $userId, string $authType): self
+    public static function create(string $authType): self
     {
         try {
             $Account = new self();
-            $Account->userId = $userId;
             $Account->authType = $authType;
             $datetime = date('Y-m-d H:i:s');
             $Account->createdAt = $datetime;
@@ -50,10 +55,25 @@ class Account extends AccountDTO
             $Account->putToDB();
             $Account = self::byId(DB::lastId())
             or throw new AppErr('error on save Account', 'Ошибка при сохранении аккаунта');
-        } catch (MyErrors) {
-            throw new AuthErr('Account was not created', 'Не удалось создать аккаунт');
+        } catch (MyErrors $err) {
+            throw new AuthErr($err->getMessage(), 'Не удалось создать аккаунт');
         }
         return $Account;
+    }
+
+    public static function byContact(Contact $contact): self|false
+    {
+        $socialProfile = match ($contact->type){
+            'telegram' => TeleUser::byContact($contact->value),
+            'discord' => DiscordUser::byContact($contact->value),
+            'vkontakte' => VkUser::byContact($contact->value),
+            'mailru' => MailruUser::byContact($contact->value),
+            default => false
+        };
+        if(!$socialProfile){
+            return false;
+        }
+        return self::byId($socialProfile->accountId);
     }
 
     public function initData(): void
@@ -61,6 +81,13 @@ class Account extends AccountDTO
         //if($this->authType === 'default') return;
         self::initSocialProfile();
         self::initAvatar();
+        self::datesToISO_8601();
+    }
+
+    private function datesToISO_8601(): void
+    {
+        $this->createdAt = DateTimeHelper::dateFormatFeel($this->createdAt, 'c');
+        $this->visitedAt = DateTimeHelper::dateFormatFeel($this->visitedAt, 'c');
     }
 
     private function initAvatar(): void
@@ -102,13 +129,19 @@ class Account extends AccountDTO
     public function initSocialProfile(): void
     {
         match ($this->authType){
-            'default' => true,
+            'default' => self::initDefault(),
             'telegram' => self::initTeleUser(),
             'mailru' => self::initMailruUser(),
             'discord' => self::initDiscordUser(),
             'vkontakte' => self::initVkUser(),
             default => null
         };
+    }
+
+    private function initDefault(): void
+    {
+        $this->nickName = 'Не авторизован';
+        $this->label = 'default';
     }
 
     private function initTeleUser(): void
@@ -120,6 +153,7 @@ class Account extends AccountDTO
         $this->externalAvaUrl = $TeleUser->photo_url;
         $this->label = 'Телеграм';
         $this->nickName = self::nickByNames($TeleUser->first_name, $TeleUser->last_name);
+        $this->contactValue = $TeleUser->username;
     }
 
     private static function nickByNames($firstName, $lastName): string
@@ -137,6 +171,7 @@ class Account extends AccountDTO
         $this->externalAvaUrl = $MailruUser->image;
         $this->label = 'mail.ru';
         $this->nickName = $MailruUser->getNickName();
+        $this->contactValue = $MailruUser->email;
     }
 
     private function initDiscordUser(): void
@@ -148,6 +183,7 @@ class Account extends AccountDTO
         $this->externalAvaUrl = "https://cdn.discordapp.com/avatars/$DiscordUser->id/$DiscordUser->avatar.png";
         $this->label = 'discord';
         $this->nickName = $DiscordUser->username;
+        $this->contactValue = $DiscordUser->username;
     }
 
     private function initVkUser(): void
@@ -159,31 +195,40 @@ class Account extends AccountDTO
         $this->externalAvaUrl = $VkUser->photo_rec;
         $this->label = 'vkontakte';
         $this->nickName = self::nickByNames($VkUser->first_name, $VkUser->last_name);
+        $this->contactValue = $VkUser->domain;
     }
 
-    /**
-     * @return self[]
-     */
-    public static function getListByUser(int $userId): array
+    public function getPowers(string $clientName): array
     {
-        $qwe = qwe("select * from accounts where userId = :userId", ['userId' => $userId]);
-        return $qwe->fetchAll(PDO::FETCH_CLASS, self::class) ?? [];
-    }
+        if($this->authType === 'default') {
+            return [];
+        }
 
-    /**
-     * @param int $deviceId
-     * @return self[]
-     */
-    public static function getListByDevice(int $deviceId): array
-    {
-        $qwe = qwe("
-            select accounts.* from accounts 
-            inner join deviceAccount dA 
-            on accounts.id = dA.accountId
-            and deviceId = :deviceId",
-        ['deviceId' => $deviceId]
+        $this->initSocialProfile();
+
+        $apiMap = [
+            'ussoStaff' => 'ussoStaff',
+            'ussoSite' => 'ussoStaff',
+            'dllib' => 'dllib',
+        ];
+        $apiName = $apiMap[$clientName];
+
+        $contact = new Contact();
+        $contact->type = $this->authType;
+        $contact->value = $this->contactValue;
+
+        $curl = new CurlAPI(
+            $apiName,
+            '/api/powers.php',
+            ['method' => 'get', 'contact' => $contact->getAllProps()]
         );
-        return $qwe->fetchAll(PDO::FETCH_CLASS, self::class) ?? [];
+        try {
+            $response = $curl->post();
+        } catch (Throwable $err) {
+            throw new CurlErr($err->getMessage(), 'Ошибка при получении доступа');
+        }
+
+        return $response->data ?? [];
     }
 
 }

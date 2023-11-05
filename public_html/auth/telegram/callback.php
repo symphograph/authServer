@@ -5,7 +5,7 @@ use App\AuthCallBack;
 use Symphograph\Bicycle\Auth\Telegram\{Telegram, TeleUser};
 use Symphograph\Bicycle\Errors\{AppErr, AuthErr};
 
-require_once dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php';
+require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 
 $authType = 'telegram';
 

@@ -1,3 +1,3 @@
 <?php
-require_once dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php';
+require_once dirname(__DIR__) . '/vendor/autoload.php';
 printr(['jhjh']);

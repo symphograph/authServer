@@ -7,7 +7,7 @@ use Symphograph\Bicycle\Env\Config;
 use Symphograph\Bicycle\Errors\AuthErr;
 use Symphograph\Bicycle\Token\{AccessToken, SessionToken, SessionTokenData, Token};
 
-require_once dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php';
+require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 
 AuthCallBack::loginChecks();
 

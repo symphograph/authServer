@@ -10,23 +10,22 @@ use Symphograph\Bicycle\Token\AccessToken;
 use Symphograph\Bicycle\Token\SessionToken;
 use Symphograph\Bicycle\Api\Response;
 
-require_once dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php';
+require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
 
 qwe("START TRANSACTION");
 
 $Device = Device::createOrUpdate();
-
-$User = User::create();
-$Account = Account::create($User->id, 'default');
+$Account = Account::create('default');
 $Session = Session::create($Account->id);
+
 $Device->linkToSess($Session->id);
 $Device->linkToAccount($Account->id);
 
 $SessionToken = SessionToken::create($Session->marker, $Session->visitedAt);
 $AccessToken = AccessToken::create(
-    uid: $User->id,
+    uid: 0,
     accountId: $Account->id,
-    powers: $Session->powers,
+    powers: [],
     createdAt: $Session->visitedAt
 );
 qwe("COMMIT");
@@ -36,7 +35,6 @@ $data = [
     'AccessToken'  => $AccessToken
 ];
 if(Env::isDebugMode()){
-    $data['User'] = $User;
     $data['Account'] = $Account;
     $data['Session'] = $Session;
     $data['Device'] = $Device;

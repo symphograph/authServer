@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\DTO\DeviceDTO;
-use App\Env\Config;
-use Symphograph\Bicycle\DB;
-use App\Models\ModelCookieTrait;
+use PDO;
+use Symphograph\Bicycle\Helpers\DateTimeHelper;
+use Symphograph\Bicycle\PDO\DB;
 use Symphograph\Bicycle\DTO\ModelTrait;
 use Symphograph\Bicycle\Errors\AuthErr;
 use Symphograph\Bicycle\Logs\ErrorLog;
@@ -32,9 +32,7 @@ class Device extends DeviceDTO
     public static function bySessId(int $sessId): self|false
     {
         $parent = parent::bySessId($sessId);
-        $self = new self();
-        $self->bindSelf($parent);
-        return $self;
+        return self::byBind($parent);
     }
 
     public static function createOrUpdate(): self
@@ -58,6 +56,10 @@ class Device extends DeviceDTO
         $time = date('Y-m-d H:i:s');
         $Device->createdAt = $time;
         $Device->visitedAt = $time;
+        $Device->fingerPrint = self::createFingerPrint();
+        $Device->platform = Agent::getSelf()->platform;
+        $Device->ismobiledevice = Agent::getSelf()->ismobiledevice;
+        $Device->browser = Agent::getSelf()->browser;
         $Device->putToDB();
         $Device->id = DB::lastId();
         $Device->setCookie(self::cookDuration);
@@ -67,6 +69,7 @@ class Device extends DeviceDTO
     public function update(): void
     {
         $this->visitedAt = date('Y-m-d H:i:s');
+        $this->fingerPrint = self::createFingerPrint();
         $this->putToDB();
         $this->setCookie(self::cookDuration);
     }
@@ -81,6 +84,16 @@ class Device extends DeviceDTO
         DB::replace('deviceAccount', $params);
     }
 
+    public function unlinkAccount(int $accountId): void
+    {
+        DB::qwe("
+            delete from deviceAccount 
+            where accountId = :accountId
+            and deviceId = :deviceId",
+            ['accountId'=>$accountId, 'deviceId'=>$this->id]
+        );
+    }
+
     public function linkToSess(int $sessId): void
     {
         $params = [
@@ -91,16 +104,27 @@ class Device extends DeviceDTO
         DB::replace('deviceSess', $params);
     }
 
-    public static function listByAccount(int $accountId): array
+    /**
+     * @param int $accountId
+     * @return self[]
+     */
+    public function listOther(int $accountId): array
     {
         $qwe = qwe("
             select devices.* from devices 
             inner join deviceAccount 
                 on devices.id = deviceAccount.deviceId
-                and deviceAccount.accountId = :accountId",
-            ['accountId'=>$accountId]
+                and deviceAccount.accountId = :accountId
+                and devices.id != :curDeviceId",
+            ['accountId'=>$accountId, 'curDeviceId'=> $this->id]
         );
-        return $qwe->fetchAll(\PDO::FETCH_CLASS, self::class) ?? [];
+        return $qwe->fetchAll(PDO::FETCH_CLASS, self::class) ?? [];
+    }
+
+    protected function datesToISO_8601(): void
+    {
+        $this->createdAt = DateTimeHelper::dateFormatFeel($this->createdAt, 'c');
+        $this->visitedAt = DateTimeHelper::dateFormatFeel($this->visitedAt, 'c');
     }
 
     public static function isLinkedToSess(string $deviceId, int $sessId): bool
@@ -124,4 +148,21 @@ class Device extends DeviceDTO
         );
         return $qwe && $qwe->rowCount();
     }
+
+    public static function createFingerPrint(): string
+    {
+        $userAgent = $_SERVER['HTTP_USER_AGENT'];
+        $ipAddress = $_SERVER['REMOTE_ADDR'];
+
+        // Дополнительная информация, которую вы можете использовать, если это необходимо
+        $acceptLanguage = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+        $encoding = $_SERVER['HTTP_ACCEPT_ENCODING'];
+
+        // Объединение всех параметров для создания уникальной строки
+        $fingerprintData = $userAgent . $ipAddress . $acceptLanguage . $encoding;
+
+        // Примените хэш-функцию (например, SHA-256) для создания уникального значения
+        return hash('sha256', $fingerprintData);
+    }
+
 }

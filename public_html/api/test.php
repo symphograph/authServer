@@ -1,11 +1,8 @@
 <?php
 
-use App\Env\Config;
+use Symphograph\Bicycle\Auth\Vkontakte\VkUser;
 
-require_once dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php';
-setcookie('testCook', '123', Config::cookOpts(expires: time()+60,samesite: 'None'));
-if(empty($_COOKIE['testCook'])){
-    echo 'empty';
-}else{
-    printr($_COOKIE);
-}
+
+
+require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
+

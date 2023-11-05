@@ -1,8 +1,11 @@
 <?php
 
 use JetBrains\PhpStorm\Language;
-use Symphograph\Bicycle\DB;
+use Symphograph\Bicycle\PDO\DB;
 use Symphograph\Bicycle\Env\Env;
+use Symphograph\Bicycle\Env\Server\ServerEnvCli;
+use Symphograph\Bicycle\Env\Server\ServerEnvHttp;
+use Symphograph\Bicycle\Env\Server\ServerEnvITF;
 
 function printr($var): void
 {
@@ -13,11 +16,24 @@ function printr($var): void
     echo '</pre>';
 }
 
-function qwe(#[Language("SQL")] string $sql, array $args = null): bool|PDOStatement
+function qwe(#[Language("SQL")] string $sql, array $args = []): false|PDOStatement
 {
-    global $DB;
-    if(!isset($DB)){
-        $DB = new DB();
+    return DB::qwe($sql, $args);
+}
+
+function getRoot(): string
+{
+    return dirname(__DIR__);
+}
+
+function getServerEnvClass(): ServerEnvITF
+{
+    global $ServerEnv;
+    if(isset($ServerEnv)) {
+        return $ServerEnv;
     }
-    return $DB->qwe($sql,$args);
+    if (PHP_SAPI === 'cli') {
+        return new ServerEnvCli();
+    }
+    return new ServerEnvHttp();
 }

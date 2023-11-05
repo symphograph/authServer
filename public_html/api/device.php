@@ -1,6 +1,7 @@
 <?php
 
 use App\CTRL\AccountCTRL;
+use App\CTRL\DeviceCTRL;
 use Symphograph\Bicycle\Errors\ApiErr;
 use Symphograph\Bicycle\Errors\ValidationErr;
 
@@ -10,11 +11,8 @@ if (empty($_POST['method'])) {
 }
 
 match ($_POST['method']) {
-    'get' => AccountCTRL::get(),
-    'byId' => AccountCTRL::byId(),
-    'getByContact' => AccountCTRL::getByContact(),
-    'listByContacts' => AccountCTRL::listByContacts(),
-    'transfer' => AccountCTRL::transfer(),
-    'list' => AccountCTRL::list(),
+    'otherList' => DeviceCTRL::otherList(),
+    'unlinkByMarker' => DeviceCTRL::unlinkByMarker(),
+    'unlinkByAccount' => DeviceCTRL::unlinkByAccount(),
     default => throw new ApiErr()
 };

@@ -8,7 +8,7 @@ use Symphograph\Bicycle\Env\Env;
 use Symphograph\Bicycle\Errors\AuthErr;
 use Symphograph\Bicycle\ITF\SocialAccountITF;
 
-require_once dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php';
+require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 
 $authType = 'mailru';
 

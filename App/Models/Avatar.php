@@ -4,6 +4,7 @@ namespace App\Models;
 
 
 
+use Symphograph\Bicycle\Env\Server\ServerEnv;
 use Symphograph\Bicycle\FileHelper;
 use Symphograph\Bicycle\ImgHelper;
 
@@ -43,7 +44,7 @@ class Avatar
         }
 
         $fileName = md5($fileData);
-        $filePath = dirname($_SERVER['DOCUMENT_ROOT']) . '/uploadtmp/' . $fileName;
+        $filePath = dirname(ServerEnv::DOCUMENT_ROOT()) . '/uploadtmp/' . $fileName;
 
         FileHelper::fileForceContents($filePath, $fileData);
         $ext = ImgHelper::getExtension($filePath);
@@ -51,7 +52,7 @@ class Avatar
         if (!$ext) {
             return false;
         }
-        $filePath = $_SERVER['DOCUMENT_ROOT'] . self::avaFolder . $fileName . '.' . $ext;
+        $filePath = ServerEnv::DOCUMENT_ROOT() . self::avaFolder . $fileName . '.' . $ext;
         if (!FileHelper::fileForceContents($filePath, $fileData)) {
             return false;
         }

@@ -2,10 +2,9 @@
 
 namespace App\DTO;
 
-use Symphograph\Bicycle\DB;
 use Symphograph\Bicycle\DTO\DTOTrait;
 
-class SessionDTO extends DTO
+class SessionDTO
 {
     use DTOTrait;
     use DTOCookieTrait;

@@ -10,7 +10,7 @@ use Symphograph\Bicycle\Auth\Discord\DiscordApi;
 use Symphograph\Bicycle\Auth\Discord\DiscordUser;
 use Symphograph\Bicycle\Errors\AuthErr;
 
-require_once dirname($_SERVER['DOCUMENT_ROOT']) . '/vendor/autoload.php';
+require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 $authType = 'discord';
 $code = $_GET['code'] ?? throw new AuthErr('invalid code');
 

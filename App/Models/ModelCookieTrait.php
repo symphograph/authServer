@@ -6,11 +6,9 @@ trait ModelCookieTrait
 {
     public static function byMarker(string $id): self|bool
     {
-        $ObjectDTO = parent::byMarker($id);
-        if(!$ObjectDTO) return false;
-        $selfObject = new self();
-        $selfObject->bindSelf($ObjectDTO);
-        return $selfObject;
+        $parent = parent::byMarker($id);
+        if(!$parent) return false;
+        return self::byBind($parent);
     }
 
 }

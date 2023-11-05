@@ -8,6 +8,7 @@ use App\Models\User;
 use Symphograph\Bicycle\Api\Response;
 use Symphograph\Bicycle\Auth\Mailru\MailruUser;
 use Symphograph\Bicycle\Errors\AccountErr;
+use Symphograph\Bicycle\Errors\AppErr;
 use Symphograph\Bicycle\Errors\NoContentErr;
 use Symphograph\Bicycle\Errors\ValidationErr;
 use Symphograph\Bicycle\Helpers;
@@ -48,10 +49,14 @@ class MailruUserCTRL extends MailruUser
         Helpers::isDate($visitedAt, 'Y-m-d H:i:s') or throw new ValidationErr();
 
         qwe("START TRANSACTION");
-        $newMailruUser = new MailruUser();
-        $newMailruUser->bindSelf(json_decode($data));
-        $User = User::create();
-        $Account = Account::create($User->id, 'mailru');
+        $newMailruUser = MailruUser::byBind($data);
+        $existsMailruUser = MailruUser::byEmail($newMailruUser->email);
+        if($existsMailruUser){
+            throw new AppErr("MailruUser $existsMailruUser->email already exists");
+        }
+
+
+        $Account = Account::create('mailru');
         $Account->createdAt = $createdAt;
         $Account->visitedAt = $visitedAt;
         $Account->putToDB();
