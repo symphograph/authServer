@@ -155,8 +155,8 @@ class Device extends DeviceDTO
         $ipAddress = $_SERVER['REMOTE_ADDR'];
 
         // Дополнительная информация, которую вы можете использовать, если это необходимо
-        $acceptLanguage = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
-        $encoding = $_SERVER['HTTP_ACCEPT_ENCODING'];
+        $acceptLanguage = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
+        $encoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
 
         // Объединение всех параметров для создания уникальной строки
         $fingerprintData = $userAgent . $ipAddress . $acceptLanguage . $encoding;
