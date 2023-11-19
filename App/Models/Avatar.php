@@ -25,9 +25,9 @@ class Avatar
             return $Avatar;
         }
         $src = self::avaFolder . $avaFileName;
-        $file = FileHelper::addRoot($src);
+        $fullPath = FileHelper::fullPath($src);
 
-        if (!file_exists($file)) {
+        if (!file_exists($fullPath)) {
             return false;
         }
         $Avatar->src = $src;
