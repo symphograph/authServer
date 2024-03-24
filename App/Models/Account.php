@@ -11,6 +11,7 @@ use Symphograph\Bicycle\Auth\Discord\DiscordUser;
 use Symphograph\Bicycle\Auth\Mailru\MailruUser;
 use Symphograph\Bicycle\Auth\Telegram\TeleUser;
 use Symphograph\Bicycle\Auth\Vkontakte\VkUser;
+use Symphograph\Bicycle\DTO\SocialAccountDTO;
 use Symphograph\Bicycle\Helpers;
 use Symphograph\Bicycle\Helpers\DateTimeHelper;
 use Symphograph\Bicycle\PDO\DB;
@@ -41,6 +42,7 @@ class Account extends AccountDTO
     public ?MailruUser  $MailruUser;
     public ?DiscordUser $DiscordUser;
     public ?VkUser      $VkUser;
+    public SocialAccountDTO $socialProfile;
     public string       $contactValue;
 
 
@@ -150,6 +152,7 @@ class Account extends AccountDTO
             or throw new AccountErr('Account does not exist', 'Аккаунт не найден');
 
         $this->TeleUser = $TeleUser;
+        $this->socialProfile = $TeleUser;
         $this->externalAvaUrl = $TeleUser->photo_url;
         $this->label = 'Телеграм';
         $this->nickName = self::nickByNames($TeleUser->first_name, $TeleUser->last_name);
@@ -227,8 +230,9 @@ class Account extends AccountDTO
         } catch (Throwable $err) {
             throw new CurlErr($err->getMessage(), 'Ошибка при получении доступа');
         }
-
-        return $response->data ?? [];
+        $powers = $response->data->powers ?? [];
+        $persId = $response->data->persId ?? null;
+        return compact('powers', 'persId');
     }
 
 }

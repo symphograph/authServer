@@ -14,7 +14,7 @@ class Device extends DeviceDTO
 {
     use ModelTrait;
     use ModelCookieTrait;
-    const cookDuration = 31536000;
+    const int cookDuration = 31536000;
 
     public static function byCookie(): self|false
     {
@@ -71,7 +71,7 @@ class Device extends DeviceDTO
         $this->visitedAt = date('Y-m-d H:i:s');
         $this->fingerPrint = self::createFingerPrint();
         $this->putToDB();
-        $this->setCookie(self::cookDuration);
+        $this->setCookie(duration: self::cookDuration, partitioned: true);
     }
 
     public function linkToAccount(int $accountId): void

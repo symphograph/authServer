@@ -3,17 +3,17 @@
 namespace App\Models;
 
 use PDO;
+use Symphograph\Bicycle\DTO\AbstractList;
 use Symphograph\Bicycle\Helpers;
+use Symphograph\Bicycle\Helpers\ArrayHelper;
 
-class AccountList
+class AccountList extends AbstractList
 {
 
     /**
-     * @param Account[] $list
+     * @var Account[]
      */
-    public function __construct(private array $list = [])
-    {
-    }
+    protected array $list = [];
 
     /**
      * @param Contact[] $contacts
@@ -37,17 +37,14 @@ class AccountList
      */
     public static function byDevice(int $deviceId): self
     {
-        $AccountList = new self();
-        $qwe = qwe("
+        $sql = "
             select accounts.* from accounts 
             inner join deviceAccount dA 
-            on accounts.id = dA.accountId
-            and deviceId = :deviceId",
-            ['deviceId' => $deviceId]
-        );
+                on accounts.id = dA.accountId
+                and deviceId = :deviceId";
 
-        $AccountList->list = $qwe->fetchAll(PDO::FETCH_CLASS, Account::class);
-        return $AccountList;
+        $params = compact('deviceId');
+        return self::bySql($sql, $params);
     }
 
     /**
@@ -67,21 +64,14 @@ class AccountList
         return $AccountList;
     }
 
-    public function initData(): void
-    {
-        foreach ($this->list as $object) {
-            $object->initData();
-        }
-    }
-
     public function sortByCreatedAt(bool $desc = false): void
     {
-        $this->list = Helpers::sortMultiArrayByProp($this->list, ['createdAt' => $desc ? 'desc' : 'asc']);
+        $this->list = ArrayHelper::sortMultiArrayByProp($this->list, ['createdAt' => $desc ? 'desc' : 'asc']);
     }
 
     public function sortByVisitedAt(bool $desc = false): void
     {
-        $this->list = Helpers::sortMultiArrayByProp($this->list, ['visitedAt' => $desc ? 'desc' : 'asc']);
+        $this->list = ArrayHelper::sortMultiArrayByProp($this->list, ['visitedAt' => $desc ? 'desc' : 'asc']);
     }
 
     /**
@@ -117,5 +107,10 @@ class AccountList
             }
         }
         return false;
+    }
+
+    #[\Override] public static function getItemClass(): string
+    {
+        return Account::class;
     }
 }

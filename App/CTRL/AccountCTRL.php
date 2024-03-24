@@ -42,6 +42,9 @@ class AccountCTRL
     {
         $Device = Device::byCookie();
         $AccountList = AccountList::byDevice($Device->getId());
+        foreach ($AccountList->getList() as $account) {
+
+        }
         $AccountList->initData();
 
         Response::data($AccountList->getList());

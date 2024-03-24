@@ -33,13 +33,17 @@ $Account->initData();
 
 
 $SessionToken = SessionToken::create($Session->marker, $Session->visitedAt);
+$curlPowers = (object) $Account->getPowers($Session->client);
+$powers = $curlPowers->powers ?? [];
+$persId = $curlPowers->persId ?? null;
 $AccessToken = AccessToken::create(
-    $Account->userId ?? 0,
-    $Account->id,
-    $Account->getPowers($Session->client),
-    $Session->visitedAt,
-    $Account->authType,
-    $Account->Avatar->fileName ?? 'init_ava.png'
+    uid: $Account->userId ?? 0,
+    accountId: $Account->id,
+        powers: $powers,
+    createdAt: $Session->visitedAt,
+    authType: $Account->authType,
+    avaFileName: $Account->Avatar->fileName ?? 'init_ava.png',
+    persId: $persId
 );
 
 $data = [

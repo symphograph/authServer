@@ -9,6 +9,7 @@ use Symphograph\Bicycle\Api\Response;
 use Symphograph\Bicycle\Errors\AppErr;
 use Symphograph\Bicycle\Errors\AuthErr;
 use Symphograph\Bicycle\Errors\ValidationErr;
+use Symphograph\Bicycle\HTTP\Request;
 use Symphograph\Bicycle\Token\AccessTokenData;
 
 class DeviceCTRL extends Device
@@ -41,13 +42,13 @@ class DeviceCTRL extends Device
     public static function unlinkByAccount(): void
     {
         $curAccountId = AccessTokenData::accountId();
-        $targetAccountId = intval($_POST['targetAccountId'] ?? false)
-            or throw new ValidationErr();
-        $targetAccount = Account::byId($targetAccountId)
-            or throw new AppErr("Account $targetAccountId does not exist");
+        Request::checkEmpty(['accountId']);
+
+        $Account = Account::byId($_POST['accountId'])
+            or throw new AppErr("Account {$_POST['accountId']} does not exist");
 
         $device = Device::byCookie();
-        $device->unlinkAccount($targetAccountId);
+        $device->unlinkAccount($Account->id);
         Response::success();
     }
 

@@ -11,8 +11,9 @@ class DeviceDTO
     use DTOTrait;
     use DTOCookieTrait;
 
-    const tableName  = 'devices';
-    const cookieName = 'Mozart';
+    const string tableName  = 'devices';
+    const string cookieName = 'Mozart';
+
     public string    $marker;
     public string    $createdAt;
     public string    $visitedAt;

@@ -8,8 +8,8 @@ class SessionDTO
 {
     use DTOTrait;
     use DTOCookieTrait;
-    const tableName = 'sessions';
-    const cookieName = 'Beethoven';
+    const string tableName  = 'sessions';
+    const string cookieName = 'Beethoven';
 
     public int     $id;
     public string  $marker;

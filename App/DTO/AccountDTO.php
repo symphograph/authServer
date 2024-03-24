@@ -8,7 +8,7 @@ use Symphograph\Bicycle\DTO\DTOTrait;
 class AccountDTO
 {
     use DTOTrait;
-    const tableName = 'accounts';
+    const string tableName = 'accounts';
 
     public int     $id;
     public ?int     $userId;

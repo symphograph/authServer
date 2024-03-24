@@ -59,7 +59,11 @@ class AuthCallBack
     ): void
     {
         DB::pdo()->beginTransaction();
-            $Sess = Session::byMarker($_COOKIE[SessionDTO::cookieName] ?? '') or
+            if(empty($_COOKIE[SessionDTO::cookieName])) {
+                throw new AuthErr('session cook is empty');
+            }
+
+            $Sess = Session::byMarker($_COOKIE[SessionDTO::cookieName]) or
             throw new AuthErr('session does not exist');
 
             if (!$existingAccount) {

@@ -15,9 +15,9 @@ trait DTOCookieTrait
         return $qwe->fetchObject(self::class);
     }
 
-    public function setCookie(int $duration = 0, $path = '/'): void
+    public function setCookie(int $duration = 0, $path = '/', $partitioned = false): void
     {
-        $opts = Cookie::opts($duration, $path, 'None');
+        $opts = Cookie::opts(expires: $duration,path: $path, samesite: 'None', partitioned: $partitioned);
         Cookie::set(self::cookieName, $this->marker, $opts);
     }
 
