@@ -46,4 +46,9 @@ class User extends UserDTO
         }
         return self::byId($account->userId);
     }
+
+    public static function auth(array $allowedPowers = []): void
+    {
+        AccessToken::validation(ServerEnv::HTTP_ACCESSTOKEN(), $allowedPowers);
+    }
 }

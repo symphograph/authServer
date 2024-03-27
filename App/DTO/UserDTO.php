@@ -10,8 +10,8 @@ class UserDTO
 {
     use DTOTrait;
     use DTOCookieTrait;
-    const tableName = 'users';
-    const cookieName = 'Haydn';
+    const string tableName  = 'users';
+    const string cookieName = 'Haydn';
 
     public int     $id;
     public string  $createdAt;

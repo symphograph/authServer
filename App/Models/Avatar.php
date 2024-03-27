@@ -14,9 +14,9 @@ class Avatar
     public ?string $externalUrl;
     public ?string $src      = '/img/avatars/init_ava.png';
     public ?string $fileName = 'init_ava.png';
-    private const avaFolder = '/img/avatars/';
-    private const emptyAva  = '/img/avatars/init_ava.png';
-    private const censored  = ['df303c56aac75aed75398543cba7da4b.jpg'];
+    private const string avaFolder = '/img/avatars/';
+    private const string emptyAva  = '/img/avatars/init_ava.png';
+    private const array censored  = ['df303c56aac75aed75398543cba7da4b.jpg'];
 
     public static function byAvaFileName(string $avaFileName): self|false
     {
