@@ -12,6 +12,7 @@ use Symphograph\Bicycle\Auth\Mailru\MailruUser;
 use Symphograph\Bicycle\Auth\Telegram\TeleUser;
 use Symphograph\Bicycle\Auth\Vkontakte\VkUser;
 use Symphograph\Bicycle\DTO\SocialAccountDTO;
+use Symphograph\Bicycle\Files\FileIMG;
 use Symphograph\Bicycle\Helpers;
 use Symphograph\Bicycle\Helpers\DateTimeHelper;
 use Symphograph\Bicycle\PDO\DB;
@@ -34,16 +35,17 @@ class Account extends AccountDTO
         'email'
     ];
 
-    public ?string      $externalAvaUrl;
-    public ?string      $label;
-    public ?string      $nickName;
-    public ?Avatar      $Avatar;
-    public ?TeleUser    $TeleUser;
-    public ?MailruUser  $MailruUser;
-    public ?DiscordUser $DiscordUser;
-    public ?VkUser      $VkUser;
+    public ?string          $externalAvaUrl;
+    public ?string          $label;
+    public ?string          $nickName;
+    public ?Avatar          $Avatar;
+    public ?TeleUser        $TeleUser;
+    public ?MailruUser      $MailruUser;
+    public ?DiscordUser     $DiscordUser;
+    public ?VkUser          $VkUser;
     public SocialAccountDTO $socialProfile;
-    public string       $contactValue;
+    public FileIMG          $AvaIMG;
+    public string           $contactValue;
 
 
     public static function create(string $authType): self
@@ -75,7 +77,7 @@ class Account extends AccountDTO
         if(!$socialProfile){
             return false;
         }
-        return self::byId($socialProfile->accountId);
+        return self::byIdAndInit($socialProfile->accountId);
     }
 
     public function initData(): void
