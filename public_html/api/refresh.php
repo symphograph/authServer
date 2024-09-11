@@ -1,14 +1,11 @@
 <?php
 
 use App\Models\Account;
-use App\Models\Client;
+use App\Models\AccountList;
 use App\Models\Device;
 use App\Models\Session;
-use App\Models\User;
-use Symphograph\Bicycle\Env\Config;
 use Symphograph\Bicycle\Env\Env;
 use Symphograph\Bicycle\Env\Server\ServerEnv;
-use Symphograph\Bicycle\Errors\AppErr;
 use Symphograph\Bicycle\Errors\AuthErr;
 use Symphograph\Bicycle\Token\AccessToken;
 use Symphograph\Bicycle\Token\SessionToken;
@@ -53,8 +50,13 @@ $data = [
 if (Env::isDebugMode()) {
     $data['Session'] = $Session;
     $data['tokenData'] = Token::toArray($AccessToken);
+    $data['accounts'] = AccountList::byDevice($Device->getId())
+        ->excludeDefaults()
+        ->initData()
+        ->getList();
 }
 $Account->visitedAt = $Session->visitedAt;
 $Account->putToDB();
 $Session->putToDB();
+
 Response::data($data);

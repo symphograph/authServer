@@ -47,6 +47,19 @@ class AccountList extends AbstractList
         return self::bySql($sql, $params);
     }
 
+    public function excludeDefaults(): static
+    {
+        $arr = [];
+        foreach ($this->list as $account){
+            if($account->authType === 'default'){
+                continue;
+            }
+            $arr[] = $account;
+        }
+        $this->list = $arr;
+        return $this;
+    }
+
     /**
      * @param int $userId
      * @return self
