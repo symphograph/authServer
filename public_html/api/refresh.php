@@ -36,7 +36,7 @@ $persId = $curlPowers->persId ?? null;
 $AccessToken = AccessToken::create(
     uid: $Account->userId ?? 0,
     accountId: $Account->id,
-        powers: $powers,
+    powers: $powers,
     createdAt: $Session->visitedAt,
     authType: $Account->authType,
     avaFileName: $Account->Avatar->fileName ?? 'init_ava.png',

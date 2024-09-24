@@ -4,8 +4,7 @@ namespace App\Models;
 
 use PDO;
 use Symphograph\Bicycle\DTO\AbstractList;
-use Symphograph\Bicycle\Helpers;
-use Symphograph\Bicycle\Helpers\ArrayHelper;
+use Symphograph\Bicycle\Helpers\Arr;
 
 class AccountList extends AbstractList
 {
@@ -79,12 +78,12 @@ class AccountList extends AbstractList
 
     public function sortByCreatedAt(bool $desc = false): void
     {
-        $this->list = ArrayHelper::sortMultiArrayByProp($this->list, ['createdAt' => $desc ? 'desc' : 'asc']);
+        $this->list = Arr::sortMultiArrayByProp($this->list, ['createdAt' => $desc ? 'desc' : 'asc']);
     }
 
     public function sortByVisitedAt(bool $desc = false): void
     {
-        $this->list = ArrayHelper::sortMultiArrayByProp($this->list, ['visitedAt' => $desc ? 'desc' : 'asc']);
+        $this->list = Arr::sortMultiArrayByProp($this->list, ['visitedAt' => $desc ? 'desc' : 'asc']);
     }
 
     /**

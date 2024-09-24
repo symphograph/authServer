@@ -47,7 +47,7 @@ class AuthCallBack
     }
 
     /**
-     * @param SocialAccountITF|bool $existingUser
+     * @param SocialAccountITF|bool $existingAccount
      * @param string $authType
      * @param SocialAccountITF $responseUser
      * @return void

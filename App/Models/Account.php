@@ -24,7 +24,7 @@ use Throwable;
 class Account extends AccountDTO
 {
     use ModelTrait;
-    public const authTypes = [
+    public const array authTypes = [
         'default',
         'telegram',
         'mailru',
@@ -225,7 +225,7 @@ class Account extends AccountDTO
         $curl = new CurlAPI(
             $apiName,
             '/api/powers.php',
-            ['method' => 'get', 'contact' => $contact->getAllProps()]
+            ['method' => 'getByContact', 'contact' => $contact->getAllProps()]
         );
         try {
             $response = $curl->post();
