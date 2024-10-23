@@ -13,10 +13,8 @@ use App\Models\User;
 use JetBrains\PhpStorm\NoReturn;
 use Symphograph\Bicycle\Api\Response;
 use Symphograph\Bicycle\Errors\AccountErr;
-use Symphograph\Bicycle\Errors\AuthErr;
 use Symphograph\Bicycle\Errors\NoContentErr;
 use Symphograph\Bicycle\Errors\ValidationErr;
-use Symphograph\Bicycle\Helpers;
 use Symphograph\Bicycle\Token\AccessTokenData;
 
 class AccountCTRL
@@ -42,9 +40,6 @@ class AccountCTRL
     {
         $Device = Device::byCookie();
         $AccountList = AccountList::byDevice($Device->getId());
-        foreach ($AccountList->getList() as $account) {
-
-        }
         $AccountList->initData();
 
         Response::data($AccountList->getList());

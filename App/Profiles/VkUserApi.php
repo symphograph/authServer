@@ -14,15 +14,17 @@ class VkUserApi extends VkUser
         $access_token = Env::getVKSecrets()->serviceKey;
         $response = $vk->users()->get($access_token, [
             'user_ids'  => [$contactValue],
-            'fields'    => ['domain', 'photo_rec', 'photo'],
+            'fields'    => ['domain', 'photo_100', 'photo_rec', 'photo'],
         ]);
         if(empty($response[0])){
             return false;
         }
+
         $vkUser = VkUser::byBind($response[0]);
 
         $vkUser->uid = $response[0]['id'];
         $vkUser->domain = $response[0]['domain'];
+        $vkUser->photo_rec = $response[0]['photo_100'];
         return $vkUser;
     }
 }

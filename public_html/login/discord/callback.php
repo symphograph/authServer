@@ -1,14 +1,9 @@
 <?php
 
 use App\AuthCallBack;
-use App\Models\Account;
-use App\Models\Client;
-use App\Models\Device;
-use App\Models\Session;
-use App\Models\User;
 use Symphograph\Bicycle\Auth\Discord\DiscordApi;
 use Symphograph\Bicycle\Auth\Discord\DiscordUser;
-use Symphograph\Bicycle\Errors\AuthErr;
+use Symphograph\Bicycle\Errors\Auth\AuthErr;
 
 require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 $authType = 'discord';

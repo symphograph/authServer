@@ -1,15 +1,16 @@
 <?php
 
-use App\Models\{Account, Client, Device, Session, User};
 use App\AuthCallBack;
+use App\OAuth\TGParams;
 use Symphograph\Bicycle\Auth\Telegram\{Telegram, TeleUser};
-use Symphograph\Bicycle\Errors\{AppErr, AuthErr};
+use Symphograph\Bicycle\Errors\Auth\AuthErr;
 
 require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 
 $authType = 'telegram';
 
-AuthCallBack::checkReferer('/auth/telegram/login.php');
+$refUrl = (new TGParams())->refUrl;
+AuthCallBack::checkReferer($refUrl);
 
 $responseUser = Telegram::auth()
     or throw new AuthErr('telegram auth error');

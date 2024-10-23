@@ -2,20 +2,12 @@
 
 namespace App\Models;
 
-use App\DTO\AccountDTO;
 use App\DTO\UserDTO;
-use PDO;
-use Symphograph\Bicycle\Api\CurlAPI;
-use Symphograph\Bicycle\Auth\Telegram\TeleUser;
 use Symphograph\Bicycle\DTO\ModelTrait;
-use Symphograph\Bicycle\Env\Config;
 use Symphograph\Bicycle\Env\Server\ServerEnv;
-use Symphograph\Bicycle\Errors\AppErr;
+use Symphograph\Bicycle\Errors\Auth\AuthErr;
 use Symphograph\Bicycle\Token\AccessToken;
-use Symphograph\Bicycle\Token\CurlToken;
-use Symphograph\Bicycle\Token\Token;
 use Symphograph\Bicycle\PDO\DB;
-use Symphograph\Bicycle\Errors\AuthErr;
 use Throwable;
 
 class User extends UserDTO

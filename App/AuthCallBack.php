@@ -3,39 +3,35 @@
 namespace App;
 
 use Symphograph\Bicycle\Env\Server\ServerEnv;
+use Symphograph\Bicycle\Env\Services\Client;
+use Symphograph\Bicycle\Errors\Auth\AuthErr;
 use Symphograph\Bicycle\HTTP\Cookie;
 use App\DTO\{UserDTO, SessionDTO};
 use App\Models\{Account, Device, Session, User};
 use Symphograph\Bicycle\PDO\DB;
 use Symphograph\Bicycle\Env\Config;
-use Symphograph\Bicycle\Errors\AppErr;
-use Symphograph\Bicycle\Errors\AuthErr;
 use Symphograph\Bicycle\ITF\SocialAccountITF;
 use Symphograph\Bicycle\Token\{AccessToken, SessionToken, SessionTokenData};
 
 class AuthCallBack
 {
-    public static function checkReferer(string $path): void
+    public static function checkReferer(string $refUrl): void
     {
-        (ServerEnv::HTTP_REFERER() ?? '')
-        ===
-        "https://" . ServerEnv::SERVER_NAME() . "$path"
-        or throw new AuthErr('unknown referer');
+        (ServerEnv::HTTP_REFERER() ?? '') === $refUrl
+            or throw new AuthErr('unknown referer');
     }
 
     public static function setCookies(): void
     {
-        $opts = Cookie::opts(600, '/auth/', 'None');
+        $opts = Cookie::opts(600, '/', 'Lax');
         $sessTokenData = new SessionTokenData($_POST['SessionToken']);
         Cookie::set('origin', ServerEnv::HTTP_ORIGIN(), $opts);
-        Cookie::set(SessionDTO::cookieName, $sessTokenData->marker, $opts);
-
+        Cookie::set(Session::cookieName, $sessTokenData->marker, $opts);
     }
 
     public static function loginChecks(): void
     {
-        Config::isClientOrigin() or
-        throw new AuthErr('invalid origin', 'Источник не определён');
+        Client::byOrigin();
 
         AccessToken::validation($_POST['AccessToken'] ?? '');
         SessionToken::validation($_POST['SessionToken'] ?? '');
@@ -59,11 +55,11 @@ class AuthCallBack
     ): void
     {
         DB::pdo()->beginTransaction();
-            if(empty($_COOKIE[SessionDTO::cookieName])) {
+            if(empty($_COOKIE[Session::cookieName])) {
                 throw new AuthErr('session cook is empty');
             }
 
-            $Sess = Session::byMarker($_COOKIE[SessionDTO::cookieName]) or
+            $Sess = Session::byMarker($_COOKIE[Session::cookieName]) or
             throw new AuthErr('session does not exist');
 
             if (!$existingAccount) {

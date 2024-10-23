@@ -3,18 +3,15 @@
 namespace App\Models;
 
 use App\DTO\SessionDTO;
-use PDO;
-use Symphograph\Bicycle\Api\CurlAPI;
-use Symphograph\Bicycle\Auth\Telegram\TeleUser;
-use Symphograph\Bicycle\Errors\AppErr;
+use Symphograph\Bicycle\Env\Services\Client;
+use Symphograph\Bicycle\Errors\Auth\AuthErr;
 use Symphograph\Bicycle\PDO\DB;
 use Symphograph\Bicycle\DTO\ModelTrait;
 use Symphograph\Bicycle\Env\Server\ServerEnv;
 use Symphograph\Bicycle\Token\AccessToken;
-use Symphograph\Bicycle\Token\CurlToken;
 use Symphograph\Bicycle\Token\SessionToken;
 use Symphograph\Bicycle\Token\Token;
-use Symphograph\Bicycle\Errors\AuthErr;
+
 use Throwable;
 
 class Session extends SessionDTO
@@ -30,8 +27,7 @@ class Session extends SessionDTO
             $Session = new self();
             $Session->marker = self::createMarker();
             $Session->accountId = $accountId;
-            $Session->client = Client::getNameByOrigin()
-                or throw new AppErr('client is empty', 'Клиент не найден');;
+            $Session->client = Client::byOrigin()->getName();
             $Session->firstIp = ServerEnv::REMOTE_ADDR();
             $Session->lastIp = ServerEnv::REMOTE_ADDR();
             $Session->createdAt = date('Y-m-d H:i:s');

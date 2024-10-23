@@ -1,12 +1,10 @@
 <?php
 
 use App\AuthCallBack;
-use App\Models\{Account, Device, Session, User};
 use Symphograph\Bicycle\Auth\Mailru\MailruUser;
 use Symphograph\Bicycle\Auth\Mailru\OAuthMailRu;
 use Symphograph\Bicycle\Env\Env;
-use Symphograph\Bicycle\Errors\AuthErr;
-use Symphograph\Bicycle\ITF\SocialAccountITF;
+use Symphograph\Bicycle\Errors\Auth\AuthErr;
 
 require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 

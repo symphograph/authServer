@@ -1,9 +1,8 @@
 <?php
 
 use App\AuthCallBack;
-use App\Models\Device;
+use App\OAuth\TGParams;
 use Symphograph\Bicycle\Auth\Telegram\Telegram;
-use Symphograph\Bicycle\Env\Env;
 
 
 require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
@@ -16,4 +15,10 @@ if(isset($_GET['logout'])) {
 
 AuthCallBack::loginChecks();
 
-echo Telegram::widgetPage(Env::getTelegramSecrets()->loginPageTitle, 'auth/telegram/callback.php');
+$tgParams = new TGParams();
+
+$pageTitle = TGParams::pageTitle;
+$botName = $tgParams->secrets->getAppId();
+$callbackUrl = $tgParams->callbackUrl;
+
+echo Telegram::widgetPage($pageTitle, $botName, $callbackUrl);

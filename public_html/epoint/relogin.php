@@ -5,7 +5,7 @@ use App\Models\Device;
 use App\Models\Session;
 use Symphograph\Bicycle\Api\Response;
 use Symphograph\Bicycle\Errors\AccountErr;
-use Symphograph\Bicycle\Errors\AuthErr;
+use Symphograph\Bicycle\Errors\Auth\AuthErr;
 use Symphograph\Bicycle\Errors\ValidationErr;
 use Symphograph\Bicycle\Token\AccessTokenData;
 use Symphograph\Bicycle\Token\SessionTokenData;

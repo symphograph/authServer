@@ -6,7 +6,7 @@ use App\Models\Device;
 use App\Models\Session;
 use Symphograph\Bicycle\Env\Env;
 use Symphograph\Bicycle\Env\Server\ServerEnv;
-use Symphograph\Bicycle\Errors\AuthErr;
+use Symphograph\Bicycle\Errors\Auth\AuthErr;
 use Symphograph\Bicycle\Token\AccessToken;
 use Symphograph\Bicycle\Token\SessionToken;
 use Symphograph\Bicycle\Api\Response;
@@ -30,7 +30,7 @@ $Account->initData();
 
 
 $SessionToken = SessionToken::create($Session->marker, $Session->visitedAt);
-$curlPowers = (object) $Account->getPowers($Session->client);
+$curlPowers = (object) $Account->getPowers();
 $powers = $curlPowers->powers ?? [];
 $persId = $curlPowers->persId ?? null;
 $AccessToken = AccessToken::create(

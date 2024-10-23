@@ -3,12 +3,11 @@
 use App\Models\Account;
 use App\Models\Device;
 use App\Models\Session;
-use App\Models\User;
 use Symphograph\Bicycle\Env\Env;
-use Symphograph\Bicycle\Errors\AuthErr;
 use Symphograph\Bicycle\Token\AccessToken;
 use Symphograph\Bicycle\Token\SessionToken;
 use Symphograph\Bicycle\Api\Response;
+use Symphograph\Bicycle\Token\Token;
 
 require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
 
@@ -38,6 +37,7 @@ if(Env::isDebugMode()){
     $data['Account'] = $Account;
     $data['Session'] = $Session;
     $data['Device'] = $Device;
+    $data['tokenData'] = Token::toArray($AccessToken);
 }
 
 Response::data($data);

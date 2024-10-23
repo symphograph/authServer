@@ -4,14 +4,16 @@
 use App\AuthCallBack;
 
 require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
+
+
 AuthCallBack::loginChecks();
-//AuthCallBack::setCookies();
+
 ?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Войти через Mail.ru</title>
     <style>
         .btn:hover {
             box-shadow: 1px 1px 5px bisque;
@@ -25,7 +27,7 @@ AuthCallBack::loginChecks();
     <h4>Войти через</h4>
     <a href="callback.php">
         <div class="btn">
-            <img  src="/img/46ed2594ead7fb40bfe59703e2b1e0b0.png">
+            <img  src="/tauth/img/46ed2594ead7fb40bfe59703e2b1e0b0.png">
         </div>
     </a>
 </div>

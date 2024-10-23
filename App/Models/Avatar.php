@@ -37,6 +37,7 @@ class Avatar
 
     public static function byExternalUrl(string $externalUrl): self|false
     {
+        $externalUrl = html_entity_decode($externalUrl);
         try {
             $fileData = file_get_contents($externalUrl);
         } catch (\Throwable) {

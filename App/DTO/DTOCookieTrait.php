@@ -23,7 +23,8 @@ trait DTOCookieTrait
 
     public static function unsetCookie(): void
     {
-        setcookie(self::cookieName, '', Config::cookOpts(expires: -3600 * 24 * 366, samesite: 'None'));
+        $opts = Config::cookOpts(expires: -3600 * 24 * 366);
+        setcookie(self::cookieName, '', $opts);
         unset($_COOKIE[self::cookieName]);
     }
 

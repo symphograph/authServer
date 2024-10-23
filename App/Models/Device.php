@@ -4,10 +4,10 @@ namespace App\Models;
 
 use App\DTO\DeviceDTO;
 use PDO;
+use Symphograph\Bicycle\Errors\Auth\AuthErr;
 use Symphograph\Bicycle\Helpers\DateTimeHelper;
 use Symphograph\Bicycle\PDO\DB;
 use Symphograph\Bicycle\DTO\ModelTrait;
-use Symphograph\Bicycle\Errors\AuthErr;
 use Symphograph\Bicycle\Logs\ErrorLog;
 
 class Device extends DeviceDTO

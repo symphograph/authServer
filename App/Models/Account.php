@@ -12,11 +12,13 @@ use Symphograph\Bicycle\Auth\Mailru\MailruUser;
 use Symphograph\Bicycle\Auth\Telegram\TeleUser;
 use Symphograph\Bicycle\Auth\Vkontakte\VkUser;
 use Symphograph\Bicycle\DTO\SocialAccountDTO;
+use Symphograph\Bicycle\Env\Env;
+use Symphograph\Bicycle\Env\Services\Client;
+use Symphograph\Bicycle\Env\Services\Service;
 use Symphograph\Bicycle\Files\FileIMG;
-use Symphograph\Bicycle\Helpers;
 use Symphograph\Bicycle\Helpers\DateTimeHelper;
 use Symphograph\Bicycle\PDO\DB;
-use Symphograph\Bicycle\Errors\{AccountErr, ApiErr, AppErr, AuthErr, CurlErr, MyErrors, ValidationErr};
+use Symphograph\Bicycle\Errors\{AccountErr, AppErr, Auth\AuthErr, CurlErr, MyErrors};
 use Symphograph\Bicycle\DTO\ModelTrait;
 use Symphograph\Bicycle\Token\AccessTokenData;
 use Throwable;
@@ -80,12 +82,13 @@ class Account extends AccountDTO
         return self::byIdAndInit($socialProfile->accountId);
     }
 
-    public function initData(): void
+    public function initData(): static
     {
         //if($this->authType === 'default') return;
-        self::initSocialProfile();
-        self::initAvatar();
-        self::datesToISO_8601();
+        $this->initSocialProfile();
+        $this->initAvatar();
+        $this->datesToISO_8601();
+        return $this;
     }
 
     private function datesToISO_8601(): void
@@ -203,34 +206,31 @@ class Account extends AccountDTO
         $this->contactValue = $VkUser->domain;
     }
 
-    public function getPowers(string $clientName): array
+    public function getPowers(): array
     {
         if($this->authType === 'default') {
             return [];
         }
 
+        $powerServiceName = Env::getPowerServiceName();
+        $powerService = Service::byName($powerServiceName);
+        $apiUrl = $powerService->getUrl();
+        $url = "$apiUrl/epoint/powers.php";
+
+
         $this->initSocialProfile();
-
-        $apiMap = [
-            'ussoStaff' => 'ussoStaff',
-            'ussoSite' => 'ussoStaff',
-            'dllib' => 'dllib',
-        ];
-        $apiName = $apiMap[$clientName];
-
         $contact = new Contact();
         $contact->type = $this->authType;
         $contact->value = $this->contactValue;
 
-        $curl = new CurlAPI(
-            $apiName,
-            '/api/powers.php',
-            ['method' => 'getByContact', 'contact' => $contact->getAllProps()]
-        );
+        $params = ['method' => 'getByContact', 'contact' => $contact->getAllProps()];
+
+        $curl = new CurlAPI($url, $params);
+
         try {
             $response = $curl->post();
         } catch (Throwable $err) {
-            throw new CurlErr($err->getMessage(), 'Ошибка при получении доступа');
+            throw new CurlErr('Curl: ' . $err->getMessage(), 'Ошибка при получении доступа');
         }
         $powers = $response->data->powers ?? [];
         $persId = $response->data->persId ?? null;

@@ -10,9 +10,8 @@ class Config extends \Symphograph\Bicycle\Env\Config
     public static function initEndPoints(): void
     {
         self::checkOrigin();
-        self::initEndPoint('/api/', ['POST', 'OPTIONS']);
-        self::initEndPoint('/api/set/', ['POST', 'OPTIONS'], ['HTTP_ACCESSTOKEN' => '']);
-        self::initEndPoint('/api/upload/', ['POST', 'OPTIONS'], ['HTTP_ACCESSTOKEN' => '']);
+        self::initEndPoint('/epoint/', ['POST', 'OPTIONS']);
+
         self::initEndPoint(
             '/curl/',
             ['GET', 'POST', 'OPTIONS'],

@@ -3,17 +3,16 @@
 namespace App\CTRL;
 
 use App\Models\Account;
-use App\Models\Client;
-use App\Models\User;
+
 use Symphograph\Bicycle\Api\Response;
 use Symphograph\Bicycle\Auth\Mailru\MailruUser;
+use Symphograph\Bicycle\Env\Services\Client;
 use Symphograph\Bicycle\Errors\AccountErr;
-use Symphograph\Bicycle\Errors\AppErr;
 use Symphograph\Bicycle\Errors\NoContentErr;
 use Symphograph\Bicycle\Errors\ValidationErr;
 use Symphograph\Bicycle\Helpers;
-use Symphograph\Bicycle\Token\AccessTokenData;
-use Symphograph\Bicycle\Token\Token;
+use Symphograph\Bicycle\HTTP\Request;
+use Symphograph\Bicycle\PDO\DB;
 
 class MailruUserCTRL extends MailruUser
 {
@@ -23,7 +22,7 @@ class MailruUserCTRL extends MailruUser
         $accountId = $_POST['accountId']
             ?? throw new ValidationErr();
         $MailruUser = self::byAccountId($accountId)
-            or throw new AccountErr('MailruUser does not exist');
+        or throw new AccountErr('MailruUser does not exist');
         Response::data($MailruUser);
     }
 
@@ -33,37 +32,41 @@ class MailruUserCTRL extends MailruUser
         $email = $_POST['email']
             ?? throw new ValidationErr();
         $MailruUser = self::byEmail($email)
-            or throw new NoContentErr();
+        or throw new NoContentErr();
         Response::data($MailruUser);
     }
 
     public static function create(): void
     {
         Client::authServer();
-        $data = $_POST['MailruUser'] ?? throw new ValidationErr();
+        Request::checkEmpty(['MailruUser', 'createdAt', 'visitedAt']);
 
-        $createdAt = $_POST['createdAt'] ?? throw new ValidationErr();
-        Helpers::isDate($createdAt, 'Y-m-d H:i:s') or throw new ValidationErr();
+        Helpers::isDate($_POST['createdAt'], 'Y-m-d H:i:s') or throw new ValidationErr();
 
-        $visitedAt = $_POST['visitedAt'] ?? throw new ValidationErr();
-        Helpers::isDate($visitedAt, 'Y-m-d H:i:s') or throw new ValidationErr();
+        Helpers::isDate($_POST['visitedAt'], 'Y-m-d H:i:s') or throw new ValidationErr();
 
-        qwe("START TRANSACTION");
-        $newMailruUser = MailruUser::byBind($data);
-        $existsMailruUser = MailruUser::byEmail($newMailruUser->email);
-        if($existsMailruUser){
-            throw new AppErr("MailruUser $existsMailruUser->email already exists");
-        }
+        $data = json_decode($_POST['MailruUser']);
+
+        DB::pdo()->beginTransaction();
+            $newMailruUser = MailruUser::byBind($data);
+            $existsMailruUser = MailruUser::byEmail($newMailruUser->email);
+            if ($existsMailruUser) {
+                $Account = Account::byId($existsMailruUser->accountId)->initData();
+                Response::data([
+                    'newMailruUser' => $existsMailruUser,
+                    'avaFilename' => $Account->avaFileName
+                ]);
+            }
 
 
-        $Account = Account::create('mailru');
-        $Account->createdAt = $createdAt;
-        $Account->visitedAt = $visitedAt;
-        $Account->putToDB();
-        $newMailruUser->accountId = $Account->id;
-        $newMailruUser->putToDB();
-        $Account->initData();
-        qwe("COMMIT");
+            $Account = Account::create('mailru');
+            $Account->createdAt = $_POST['createdAt'];
+            $Account->visitedAt = $_POST['visitedAt'];
+            $Account->putToDB();
+            $newMailruUser->accountId = $Account->id;
+            $newMailruUser->putToDB();
+            $Account->initData();
+        DB::pdo()->commit();
         Response::data(['newMailruUser' => $newMailruUser, 'avaFilename' => $Account->avaFileName]);
     }
 }

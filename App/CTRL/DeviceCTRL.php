@@ -7,7 +7,7 @@ use App\Models\Device;
 use JetBrains\PhpStorm\NoReturn;
 use Symphograph\Bicycle\Api\Response;
 use Symphograph\Bicycle\Errors\AppErr;
-use Symphograph\Bicycle\Errors\AuthErr;
+use Symphograph\Bicycle\Errors\Auth\AuthErr;
 use Symphograph\Bicycle\Errors\ValidationErr;
 use Symphograph\Bicycle\HTTP\Request;
 use Symphograph\Bicycle\Token\AccessTokenData;
