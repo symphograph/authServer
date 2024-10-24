@@ -13,10 +13,9 @@ use Symphograph\Bicycle\Auth\Telegram\TeleUser;
 use Symphograph\Bicycle\Auth\Vkontakte\VkUser;
 use Symphograph\Bicycle\DTO\SocialAccountDTO;
 use Symphograph\Bicycle\Env\Env;
-use Symphograph\Bicycle\Env\Services\Client;
 use Symphograph\Bicycle\Env\Services\Service;
 use Symphograph\Bicycle\Files\FileIMG;
-use Symphograph\Bicycle\Helpers\DateTimeHelper;
+use Symphograph\Bicycle\Helpers\Date;
 use Symphograph\Bicycle\PDO\DB;
 use Symphograph\Bicycle\Errors\{AccountErr, AppErr, Auth\AuthErr, CurlErr, MyErrors};
 use Symphograph\Bicycle\DTO\ModelTrait;
@@ -93,8 +92,8 @@ class Account extends AccountDTO
 
     private function datesToISO_8601(): void
     {
-        $this->createdAt = DateTimeHelper::dateFormatFeel($this->createdAt, 'c');
-        $this->visitedAt = DateTimeHelper::dateFormatFeel($this->visitedAt, 'c');
+        $this->createdAt = Date::dateFormatFeel($this->createdAt, 'c');
+        $this->visitedAt = Date::dateFormatFeel($this->visitedAt, 'c');
     }
 
     private function initAvatar(): void

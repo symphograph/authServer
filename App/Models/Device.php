@@ -5,7 +5,7 @@ namespace App\Models;
 use App\DTO\DeviceDTO;
 use PDO;
 use Symphograph\Bicycle\Errors\Auth\AuthErr;
-use Symphograph\Bicycle\Helpers\DateTimeHelper;
+use Symphograph\Bicycle\Helpers\Date;
 use Symphograph\Bicycle\PDO\DB;
 use Symphograph\Bicycle\DTO\ModelTrait;
 use Symphograph\Bicycle\Logs\ErrorLog;
@@ -123,8 +123,8 @@ class Device extends DeviceDTO
 
     protected function datesToISO_8601(): void
     {
-        $this->createdAt = DateTimeHelper::dateFormatFeel($this->createdAt, 'c');
-        $this->visitedAt = DateTimeHelper::dateFormatFeel($this->visitedAt, 'c');
+        $this->createdAt = Date::dateFormatFeel($this->createdAt, 'c');
+        $this->visitedAt = Date::dateFormatFeel($this->visitedAt, 'c');
     }
 
     public static function isLinkedToSess(string $deviceId, int $sessId): bool
