@@ -47,7 +47,7 @@ class Session extends SessionDTO
     public static function byJWT(): self
     {
         if (empty($_POST['SessionToken']) || empty($_POST['AccessToken'])) {
-            throw new AuthErr('tokens is empty', httpStatus: 400);
+            throw new AuthErr('tokens is empty');
         }
         SessionToken::validation(jwt: $_POST['SessionToken']);
         AccessToken::validation(jwt: $_POST['AccessToken'], ignoreExpire: true);

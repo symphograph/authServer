@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\DTO\DeviceDTO;
 use PDO;
+use Symphograph\Bicycle\Env\Server\ServerEnv;
 use Symphograph\Bicycle\Errors\Auth\AuthErr;
 use Symphograph\Bicycle\Helpers\Date;
+use Symphograph\Bicycle\HTTP\Cookie;
 use Symphograph\Bicycle\PDO\DB;
 use Symphograph\Bicycle\DTO\ModelTrait;
 use Symphograph\Bicycle\Logs\ErrorLog;
@@ -62,8 +64,15 @@ class Device extends DeviceDTO
         $Device->browser = Agent::getSelf()->browser;
         $Device->putToDB();
         $Device->id = DB::lastId();
-        $Device->setCookie(self::cookDuration);
+        $Device->setCookieDevice();
         return $Device;
+    }
+
+    public function setCookieDevice(): void
+    {
+        $domain = '.' . ServerEnv::SERVER_NAME();
+        $opts = Cookie::opts(expires: self::cookDuration, samesite: 'None', domain: $domain);
+        Cookie::set(self::cookieName, $this->marker, $opts);
     }
 
     public function update(): void
@@ -71,7 +80,7 @@ class Device extends DeviceDTO
         $this->visitedAt = date('Y-m-d H:i:s');
         $this->fingerPrint = self::createFingerPrint();
         $this->putToDB();
-        $this->setCookie(duration: self::cookDuration, partitioned: true);
+        $this->setCookieDevice();
     }
 
     public function linkToAccount(int $accountId): void
